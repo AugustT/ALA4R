@@ -1,0 +1,30 @@
+language: r
+cache: packages
+sudo: required
+
+# Warnings don't fail build
+warnings_are_errors: false
+
+## Email notification if the package pass status changes
+notifications:
+  email:
+  recipients:
+    - tomaug@ceh.ac.uk
+  on_success: change
+  on_failure: change
+
+## Set up the matrix of different runs
+env:
+  matrix:
+  - r: release
+    not_cran: true
+    r_check_args: "--no-manual --no-build-vignettes'"
+  - r: release
+    not_cran: false
+    r_check_args: "--no-manual --as--cran --no-build-vignettes'"
+  - r: devel
+    not_cran: true
+    r_check_args: "--no-manual --no-build-vignettes'"
+  - r: devel
+    not_cran: false
+    r_check_args: "--no-manual --as--cran --no-build-vignettes'"
