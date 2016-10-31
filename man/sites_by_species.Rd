@@ -8,7 +8,7 @@ sites_by_species(taxon, wkt, gridsize = 0.1, SPdata.frame = FALSE,
   verbose = ala_config()$verbose)
 }
 \arguments{
-\item{taxon}{string: the identifier to get the species data from the ala biocache. E.g. "genus:Macropus".}
+\item{taxon}{string: the identifier to get the species data from the ala biocache. E.g. "genus:Macropus". See \code{ala_fields("occurrence_stored")} for valid field names}
 
 \item{wkt}{string: Bounding area in Well Known Text (WKT) format. E.g. "POLYGON((118 -30,146 -30,146 -11,118 -11,118 -30))".}
 
@@ -27,9 +27,9 @@ A data.frame is returned as grid cells by species with values in each cell being
 \examples{
 \dontrun{
 # Eucalyptus in Tasmania based on a 0.1 degree grid
-ss=sites_by_species(taxon='genus:Eucalyptus',wkt='POLYGON((144 -43,148 -43,148 -40,
-  144 -40,144 -43))',gridsize=0.1,verbose=TRUE)
-ss[,1:6]
+ss <- sites_by_species(taxon="genus:Eucalyptus",wkt="POLYGON((144 -43,148 -43,148 -40,
+  144 -40,144 -43))",gridsize=0.1,verbose=TRUE)
+head(ss[,1:6])
 # equivalent direct POST webservice call:
 # http://spatial.ala.org.au/alaspatial/ws/sitesbyspecies?speciesq=genus:Eucalyptus&qname=data&
 #  area=POLYGON((144\%20-43,148\%20-43,148\%20-40,144\%20-40,144\%20-43))&bs=http://biocache.ala.org.au/
@@ -40,13 +40,8 @@ ss[,1:6]
 attr(ss,"guid")[1]
 }
 }
-\author{
-Atlas of Living Australia \email{support@ala.org.au}
-}
 \references{
-\url{http://api.ala.org.au/ws}
-
-\url{http://spatial.ala.org.au/ws}
+Associated web services: \url{http://spatial.ala.org.au/ws}
 
 \url{http://www.geoapi.org/3.0/javadoc/org/opengis/referencing/doc-files/WKT.html}
 }

@@ -17,17 +17,16 @@ This provides a data.frame detailing the assertions that are found in a dataset 
 }
 \examples{
 #download species data with all possible assertions
-x=occurrences(taxon="golden bowerbird",download_reason_id=10,qa=ala_fields('assertions')$name)
-asserts = check_assertions(x) #data.frame of assertions, their description and column names
-asserts[0:86,5] # List out descriptions of all (current) assertions
+\dontrun{
+ x <- occurrences(taxon="golden bowerbird",download_reason_id=10,qa=ala_fields("assertions")$name)
+ asserts <- check_assertions(x) #data.frame of assertions, their description and column names
+ asserts$description # List out descriptions of all (current) assertions
 
+ tmp <- x$data[,names(x$data) \%in\% asserts$name] ## assertion columns from data
+ which(colSums(tmp)>0) ## discard those not seen in the data
 }
-\author{
-Atlas of Living Australia \email{support@ala.org.au}
 }
 \references{
-\url{http://api.ala.org.au/}
-
-\url{http://biocache.ala.org.au/ws/assertions/codes}
+\url{http://api.ala.org.au/}, \samp{http://biocache.ala.org.au/ws/assertions/codes}
 }
 

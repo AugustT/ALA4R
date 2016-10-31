@@ -2,7 +2,6 @@
 #' 
 #' Provides names, taxonomic classification, and other information for a list of GUIDs.
 #'
-#' @author Atlas of Living Australia \email{support@@ala.org.au}
 #' @references The associated ALA web service: \url{http://api.ala.org.au/#ws87}
 #' 
 #' @param guids string: a single GUID or vector of GUIDs
@@ -12,10 +11,10 @@
 #' @return A data frame, which should include one entry (i.e. one data.frame row or one list element) per input GUID. The columns in the data.frame output may vary depending on the results returned by the ALA server, but should include searchTerm, name, rank, and guid.
 #' 
 #' @examples
-#' 
+#' \dontrun{
 #' search_guids(c("urn:lsid:biodiversity.org.au:afd.taxon:95773568-053d-44de-a624-5699f0ac4a59",
 #'   "http://id.biodiversity.org.au/node/apni/2890970","this_is_not_a_valid_guid"))
-#' 
+#' }
 #' 
 #' @export
 
@@ -37,7 +36,7 @@ search_guids <- function(guids=c(),occurrence_count=FALSE,output_format="simple"
     assert_that(is.flag(occurrence_count))
     assert_that(is.character(output_format))
     output_format <- match.arg(tolower(output_format),c("simple","complete"))
-    this_url <- build_url_from_parts(ala_config()$base_url_bie,c("species","guids","bulklookup"))
+    this_url <- build_url_from_parts(getOption("ALA4R_server_config")$base_url_bie,c("species","guids","bulklookup"))
     temp <- jsonlite::toJSON(guids)
     x <- cached_post(url=this_url,body=temp,type="json",content_type="application/json")
     ## x is a named list with one element
@@ -56,8 +55,6 @@ search_guids <- function(guids=c(),occurrence_count=FALSE,output_format="simple"
             ## column names within the data matrix are returned as camelCase
             ## add searchTerm, so user can more easily see what each original query was
             x$searchTerm <- guids
-            ## rename some columns
-            names(x)[names(x)=="classs"] <- "class"
             ## remove some columns that are unlikely to be of value here
             xcols <- setdiff(names(x),unwanted_columns("general"))
             ## reorder columns, for minor convenience
@@ -67,9 +64,7 @@ search_guids <- function(guids=c(),occurrence_count=FALSE,output_format="simple"
             x <- subset(x,select=xcols)            
             attr(x,"output_format") <- output_format            
         } else {
-            if (ala_config()$warn_on_empty) {
-                warning("no records found");
-            }
+            if (ala_config()$warn_on_empty) warning("no records found")
             x <- data.frame(searchTerm=guids,name=NA,commonName=NA,rank=NA,guid=NA)
             attr(x,"output_format") <- output_format
         }

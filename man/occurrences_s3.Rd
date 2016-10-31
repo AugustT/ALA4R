@@ -52,27 +52,25 @@ This uses information based on selections of assertions (quality assurance issue
 \code{unique} will give the min value for all columns that are not used in the aggregation.
 }
 \examples{
+\dontrun{
 #download some observations
-x=occurrences(taxon="Amblyornis newtonianus",download_reason_id=10)
+x <- occurrences(taxon="Amblyornis newtonianus",download_reason_id=10)
 
 #summarize the occurrences
 summary(x)
 
 #keep spatially unique data at 0.01 degrees (latitude and longitude)
-tt = unique(x,spatial=0.01)
+tt <- unique(x,spatial=0.01)
 summary(tt)
 
 #keep spatially unique data that is also unique year/month for the collection date
-tt = unique(x,spatial=0,temporal='yearmonth')
+tt <- unique(x,spatial=0,temporal='yearmonth')
 summary(tt)
 
 #keep only information for which fatal or "error" assertions do not exist
-tt = subset(x)
+tt <- subset(x)
 summary(tt)
-
 }
-\author{
-Atlas of Living Australia \email{support@ala.org.au}
 }
 \references{
 \url{http://api.ala.org.au/}

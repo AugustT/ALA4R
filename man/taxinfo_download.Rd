@@ -19,7 +19,7 @@ To obtain OR behaviour, use the form c("field1:abc OR field2:def")}
 
 \item{fields}{string vector: (optional) a vector of field names to return. Note that the columns of the returned data 
 frame are not guaranteed to retain the ordering of the field names given here. If not specified, a default list of 
-fields will be returned. See \code{ala_fields("general",as_is=TRUE)} for valid field names}
+fields will be returned. See \code{ala_fields("general",as_is=TRUE)} for valid field names. Use \code{fields="all"} to include all available fields}
 
 \item{verbose}{logical: show additional progress information? [default is set by ala_config()]}
 
@@ -35,17 +35,15 @@ Download taxonomic data
 }
 \examples{
 \dontrun{
-# Download data for Fabaceae
-x=taxinfo_download("family:Fabaceae",fields=c("guid","parentGuid","kingdom","phylum","class",
-  "bioOrder","family","genus","nameComplete"))
-## note that requesting "nameComplete" gives the scientific name but requesting "scientificName"
-## will not --- bug to be fixed in ALA's web service
-# equivalent direct URL: http://bie.ala.org.au/ws/download?fields=guid,parentGuid,kingdom,phylum,
-#    class,bioOrder,family,genus,nameComplete&q=family:Fabaceae
+## simplest usage
+x <- taxinfo_download("rk_genus:Macropus")
+
+## Data for Fabaceae with specified fields
+x <- taxinfo_download("rk_family:Fabaceae",fields=c("guid","parentGuid","rk_kingdom","rk_phylum",
+  "rk_class","rk_order","rk_family","rk_genus","scientificName"))
+# equivalent direct URL: http://bie.ala.org.au/ws/download?fields=guid,parentGuid,rk_kingdom,
+#    rk_phylum,rk_class,rk_order,rk_family,rk_genus,scientificName&q=rk_family:Fabaceae
 }
-}
-\author{
-Atlas of Living Australia \email{support@ala.org.au}
 }
 \references{
 Associated ALA web service: \url{http://api.ala.org.au/#ws2}

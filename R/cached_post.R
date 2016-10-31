@@ -10,7 +10,6 @@
 # @param ... additional arguments passed to curlPerform
 # @return for type=="text" the content is returned as text. For type=="json", the content is parsed using jsonlite::fromJSON. For "filename", the name of the stored file is returned.
 # @details Depending on the value of caching, the page is either retrieved from the cache or from the url, and stored in the cache if appropriate. The user-agent string is set according to ala_config()$user_agent. The returned response (if not from cached file) is also passed to check_status_code().
-# @author Atlas of Living Australia \email{support@@ala.org.au}
 # @references \url{http://api.ala.org.au/}
 # @examples
 #
@@ -29,13 +28,14 @@ cached_post=function(url,body,type="text",caching=ala_config()$caching,verbose=a
 
     ## strip newlines or multiple spaces from url: these seem to cause unexpected behaviour
     url=str_replace_all(url,"[\r\n ]+"," ")
+    if (nchar(url)>getOption("ALA4R_server_config")$server_max_url_length) warning("URL length may be longer than is allowed by the server")
 
     if (FALSE) {
         ## this is breaking, for some reason. As a workaround use the caching code by default
 
     ##if (identical(caching,"off") && !(type %in% c("filename","binary_filename"))) {
         ## if we are not caching, retrieve our page directly without saving to file at all
-        if (verbose) { cat(sprintf("  ALA4R: POSTing URL %s\n",url)) }
+        if (verbose) { cat(sprintf("  POSTing URL %s\n",url)) }
         x=POST(url=url,body=body,user_agent(ala_config()$user_agent),encode="form")
         check_status_code(x)
         x=content(x,as="text")
@@ -50,7 +50,7 @@ cached_post=function(url,body,type="text",caching=ala_config()$caching,verbose=a
         ## check if file exists
         if ((caching %in% c("off","refresh")) || (! file.exists(thisfile))) {
             ## file does not exist, or we want to refresh it, so go ahead and get it and save to thisfile
-            if (verbose) { cat(sprintf("  ALA4R: caching %s POST to file %s\n",url,thisfile)) }
+            if (verbose) { cat(sprintf("  caching %s POST to file %s\n",url,thisfile)) }
             file_mode="w" ## text mode
             if (identical(type,"binary_filename")) {
                 file_mode="wb" ## if we try and download binary files without this, it will fail (but only on Windows)
@@ -78,7 +78,7 @@ cached_post=function(url,body,type="text",caching=ala_config()$caching,verbose=a
             }
             check_status_code(h$value()[["status"]],extra_info=diag_message)
         } else {
-            if (verbose) { cat(sprintf("  ALA4R: using cached file %s for POST to %s\n",thisfile,url)) }
+            if (verbose) { cat(sprintf("  using cached file %s for POST to %s\n",thisfile,url)) }
         }
         ## now return whatever is appropriate according to type
         if (type %in% c("json","text")) {
@@ -103,5 +103,3 @@ cached_post=function(url,body,type="text",caching=ala_config()$caching,verbose=a
         }
     }
 }
-
-

@@ -9,33 +9,32 @@
 # @param extra_info string: additional diagnostic info that will be shown to the user for 4xx or 5xx codes, where x is not a full response object
 # @return integer: simplified status code (0=success (2xx codes), 1=warning (3xx codes))
 # @references \url{http://www.w3.org/Protocols/HTTP/HTRESP.html}
-# @author Atlas of Living Australia \email{support@@ala.org.au}
 # @examples
 # \dontrun{
 # require(httr)
-# out = GET(url="http://www.ala.org.au/")
+# out <- GET(url="http://www.ala.org.au/")
 # check_status_code(out) ## pass the whole response object
 # check_status_code(out$headers$status) ## or pass the status code explicitly
 # }
 
-check_status_code=function(x,on_redirect=NULL,on_client_error=NULL,on_server_error=NULL,extra_info="") {
+check_status_code <- function(x,on_redirect=NULL,on_client_error=NULL,on_server_error=NULL,extra_info="") {
     assert_that(is.string(extra_info))
-    was_full_response=FALSE
+    was_full_response <- FALSE
     if (inherits(x,"response")) {
         ## if this is a response object, extract the status code
         ## we may also be able to get meaningful diagnostic info out of the message body in some cases
-        was_full_response=TRUE
-        xstatus=x$headers$status
+        was_full_response <- TRUE
+        xstatus <- x$headers$status
         if (is.null(xstatus)) {
             ## newer httr has changed, try this
-            xstatus=as.character(x$status_code) 
-            was_full_response=FALSE
+            xstatus <- as.character(x$status_code) 
+            was_full_response <- FALSE
         }
         ## check again
         if (is.null(xstatus)) {
-                warning("error in http status checking: skipped (please notify the package maintainers)")
-                was_full_response=FALSE
-                xstatus="200" ## default to OK
+                warning("error in http status checking: skipped. ",getOption("ALA4R_server_config")$notify)
+                was_full_response <- FALSE
+                xstatus <- "200" ## default to OK
         }
     } else {
         ## expect either string (e.g. "500") or integer
@@ -44,10 +43,10 @@ check_status_code=function(x,on_redirect=NULL,on_client_error=NULL,on_server_err
                 stop("expecting either http response object, or status code as string or numeric")
             } else {
                 ## is integer - convert to string
-                x=as.character(x)
+                x <- as.character(x)
             }
         }
-        xstatus=x
+        xstatus <- x
     }
     switch (substr(xstatus,1,1),
             "2"={ ## 2xx are all success codes
@@ -60,7 +59,7 @@ check_status_code=function(x,on_redirect=NULL,on_client_error=NULL,on_server_err
                     return(on_redirect(xstatus))
                 } else {
                     ## just issue a warning for now
-                    warning("ALA4R: HTTP status code ",xstatus," received.\nThis may be OK: if there are problems, please notify the package maintainers.")
+                    warning("HTTP status code ",xstatus," received.\nThis may be OK: if there are problems, please notify the package maintainers.")
                     return(1)
                 }
             },
@@ -71,18 +70,18 @@ check_status_code=function(x,on_redirect=NULL,on_client_error=NULL,on_server_err
                     assert_that(is.function(on_client_error))
                     return(on_client_error(xstatus))
                 } else {
-                    diag_msg="  Either there was an error with your request, in the ALA4R package, or the ALA servers are down. Please try again later and notify the package maintainers if you still have problems."
+                    diag_msg <- paste0("  Either there was an error with your request or in the ",getOption("ALA4R_server_config")$brand," package, or the servers are down. ",getOption("ALA4R_server_config")$notify)
                     if (was_full_response) {
-                        x=jsonlite::fromJSON(content(x,type="text"))
+                        x <- jsonlite::fromJSON(content(x,type="text"))
                         if (!is.null(x$message)) {
-                            diag_msg=paste(diag_msg,"\nThe error message was:",x$message,sep=" ")
+                            diag_msg <- paste(diag_msg,"\nThe error message was:",x$message,sep=" ")
                         }
                     } else {
                         if (nchar(extra_info)>0) {
-                            diag_msg=paste(diag_msg,"\n  Some additional diagnostic information that might help:",extra_info,sep=" ")
+                            diag_msg <- paste(diag_msg,"\n  Some additional diagnostic information that might help:",extra_info,sep=" ")
                         }
                     }
-                    stop("ALA4R: HTTP status code ",xstatus," received.\n",diag_msg)
+                    stop("HTTP status code ",xstatus," received.\n",diag_msg)
                 }
             },
             "5"={ ## 5xx are server errors
@@ -90,20 +89,20 @@ check_status_code=function(x,on_redirect=NULL,on_client_error=NULL,on_server_err
                     assert_that(is.function(on_server_error))
                     return(on_server_error(xstatus))
                 } else {
-                    diag_msg="  Either there was an error with the request, or the ALA service may be down (try again later). Notify the package maintainers if you still have problems."
+                    diag_msg <- paste0("  Either there was an error with the request, or the servers may be down (try again later). ",getOption("ALA4R_server_config")$notify)
                     if (was_full_response) {
-                        x=jsonlite::fromJSON(content(x,type="text"))
+                        x <- jsonlite::fromJSON(content(x,type="text"))
                         if (!is.null(x$message)) {
-                            diag_msg=paste(diag_msg,"\nThe error message was:",x$message,sep=" ")
+                            diag_msg <- paste(diag_msg,"\nThe error message was:",x$message,sep=" ")
                         }
                     } else {
                         if (nchar(extra_info)>0) {
-                            diag_msg=paste(diag_msg,"\n  Some additional diagnostic information that might help:",extra_info,sep=" ")
+                            diag_msg <- paste(diag_msg,"\n  Some additional diagnostic information that might help:",extra_info,sep=" ")
                         }
                     }                        
-                    stop("ALA4R: HTTP status code ",xstatus," received.\n",diag_msg)
+                    stop("HTTP status code ",xstatus," received.\n",diag_msg)
                 }
             }
         )
-    warning("ALA4R: unexpected HTTP status code ",x," received.\n  If there are problems, please notify the package maintainers.")
+    warning("Unexpected HTTP status code ",x," received.\n  ",getOption("ALA4R_server_config")$notify)
 }

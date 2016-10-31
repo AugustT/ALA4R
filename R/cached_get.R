@@ -8,7 +8,6 @@
 # @param on_redirect, on_server_error, on_client_error function: passed to check_status_code()
 # @return for type=="text" the content is returned as text. For type=="json", the content is parsed using jsonlite::fromJSON. For "filename", the name of the stored file is returned.
 # @details Depending on the value of caching, the page is either retrieved from the cache or from the url, and stored in the cache if appropriate. The user-agent string is set according to ala_config()$user_agent. The returned response (if not from cached file) is also passed to check_status_code().
-# @author Atlas of Living Australia \email{support@@ala.org.au}
 # @references \url{http://api.ala.org.au/}
 # @examples
 #
@@ -25,10 +24,11 @@ cached_get=function(url,type="text",caching=ala_config()$caching,verbose=ala_con
 
     ## strip newlines or multiple spaces from url: these seem to cause unexpected behaviour
     url=str_replace_all(url,"[\r\n ]+"," ")
+    if (nchar(url)>getOption("ALA4R_server_config")$server_max_url_length) warning("URL length may be longer than is allowed by the server")
 
     if (identical(caching,"off") && !(type %in% c("filename","binary_filename"))) {
         ## if we are not caching, get this directly without saving to file at all
-        if (verbose) { cat(sprintf("  ALA4R: GETting URL %s\n",url)) }
+        if (verbose) { cat(sprintf("  GETting URL %s\n",url)) }
 
         ## if use RCurl directly
         h=basicHeaderGatherer()
