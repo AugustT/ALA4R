@@ -24,9 +24,10 @@ Imports:
     assertthat,
     sp
 Suggests:
+    knitr,
     data.table,
     testthat,
-    R.rsp
+    R.rsp,
     jpeg,
     phytools,
     ape,

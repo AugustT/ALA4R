@@ -2,8 +2,9 @@
 output: html_document
 ---
 <!--
-%\VignetteEngine{knitr::knitr}
+%\VignetteEngine{knitr::rmarkdown}
 %\VignetteIndexEntry{ALA4R}
+%\VignetteDepends{knitr,plyr,jpeg,phytools,ape,leafletR,vegan,mgcv,geosphere,maps,mapdata,maptools} \\
 -->
 <!-- To build this vignette, open this file in RStudio and knit to HTML -->
 
@@ -145,7 +146,7 @@ First, check that we have some additional packages that we'll use in the example
 ```{r}
 to_install=c("plyr","jpeg","phytools","ape","leafletR","vegan","mgcv","geosphere","maps","mapdata","maptools")
 to_install=setdiff(to_install,installed.packages()[,"Package"])
-if(length(to_install)) install.packages(to_install)
+if(length(to_install)) install.packages(to_install, repos = "http://cran.us.r-project.org")
 ```
 
 We'll use the `plyr` package throughout these examples, so load that now:
@@ -164,12 +165,12 @@ We want to look at the taxonomic tree of penguins, but we don't know what the co
 
 ```{r}
 sx=search_fulltext("penguins")
-(sx$data[,c("name","rank","score","commonName")])
+sx$data[,c("name","rank","commonName")]
 ```
 And we can see from the first result that penguins correspond to the family Spheniscidae. Now we can download the taxonomic data (note that the search is case-sensitive, so "SPHENISCIDAE" must appear as it does in the search results above):
 
 ```{r message=FALSE}
-tx=taxinfo_download("family:SPHENISCIDAE",fields=c("guid","genus","nameComplete","rank"))
+tx=taxinfo_download("rk_family:SPHENISCIDAE",fields=c("guid","rk_genus","nameComplete","rank"))
 tx=tx[tx$rank %in% c("species","subspecies"),] ## restrict to species and subspecies
 ```
 
@@ -185,15 +186,15 @@ tr=plotTree(ax,type="fan",fsize=0.7) ## plot it
 We can also plot the tree with images of the different penguin species. We'll first extract a species profile for each species identifier (guid) in our results:
 
 ```{r}
-s=lapply(tx$guid,function(z){ species_info(guid=z) })
+s=lapply(tx$scientificName,function(z){ species_info(scientificname = z) })
 ```
 And for each of those species profiles, find the first jpeg image, download it and store it in our data cache:
 
 ```{r}
 imfiles=sapply(s,function(z){ 
   ifelse(any(grepl("(\\.jpg)",z$images$smallImageUrl,ignore.case=TRUE)),
-  ALA4R:::cached_get(z$images$smallImageUrl[grepl("(\\.jpg)",z$images$smallImageUrl,
-  ignore.case=TRUE)][1],type="binary_filename"),"") 
+         ALA4R:::cached_get(z$images$smallImageUrl[grepl("(\\.jpg)",z$images$smallImageUrl, ignore.case=TRUE)][1],type="binary_filename"),
+         "") 
 })
 ```
 
